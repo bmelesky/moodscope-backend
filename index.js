@@ -6,12 +6,12 @@ const cors = require('cors');
 // Create the Express app
 const app = express();
 app.use(cors());
-app.use(express.json()); // <-- ADD THIS: Allows server to read JSON
+app.use(express.json());
 const port = 3000;
 
-// Supabase Connection Info (Your credentials should still be here)
-const supabaseUrl = 'https://yrruztycksvefqtjsgeu.supabase.co/';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlycnV6dHlja3N2ZWZxdGpzZ2V1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM5MDQ2OTYsImV4cCI6MjA2OTQ4MDY5Nn0.bHNoYl-7lygXSqoagi2eqcu0ewUBz0RniaEDYiZRDCI';
+// Supabase Connection Info
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 
@@ -31,20 +31,21 @@ app.get('/', async (req, res) => {
 
 // === THIS NEW ROUTE IS FOR SAVING A MOOD ===
 app.post('/moods', async (req, res) => {
-    const { mood_score, activities, notes } = req.body; // Get data from the request
+    const { mood_score, activities, notes } = req.body;
 
     const { data, error } = await supabase
         .from('moods')
         .insert([
             { mood_score, activities, notes }
-        ]);
+        ])
+        .select(); // <-- THE FIX IS ADDING THIS .select()
 
     if (error) {
         console.error('Error saving mood:', error);
         return res.status(500).json({ error: error.message });
     }
 
-    res.json({ success: true, data: data });
+    res.json({ success: true, savedEntry: data[0] });
 });
 
 
