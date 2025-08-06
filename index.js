@@ -6,7 +6,7 @@ const cors = require('cors');
 // Create the Express app
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // <-- THIS IS THE MISSING TRANSLATOR LINE
 const port = 3000;
 
 // Supabase Connection Info
@@ -29,7 +29,7 @@ app.get('/', async (req, res) => {
 });
 
 
-// === THIS NEW ROUTE IS FOR SAVING A MOOD ===
+// === THIS ROUTE IS FOR SAVING A MOOD ===
 app.post('/moods', async (req, res) => {
     const { mood_score, activities, notes } = req.body;
 
@@ -38,7 +38,7 @@ app.post('/moods', async (req, res) => {
         .insert([
             { mood_score, activities, notes }
         ])
-        .select(); // <-- THE FIX IS ADDING THIS .select()
+        .select();
 
     if (error) {
         console.error('Error saving mood:', error);
